@@ -106,7 +106,7 @@ def newTodo():
         db.session.commit()
         return jsonify({"202": "Success"})
 
-@app.route("/view_todos", methods=["POST"])
+@app.route("/list_todo", methods=["POST"])
 def viewTodo():
     if not request.json:
         abort(400)
@@ -120,6 +120,23 @@ def viewTodo():
         for todo in todos:
             data.append({"id": todo.id, "title": todo.title, "message": todo.message})
         return jsonify({"202": "Success", "todos": data})
+
+@app.route("/toggle_todo", methods=["POST"])
+def viewTodo():
+    if not request.json:
+        abort(400)
+    data = request.json
+    user = User.query.filter_by(token=data["token"]).first()
+    if user == None:
+        return jsonify({"403": "Uauthorized Access"})
+    else:
+        todo = Todo.query.filter_by(id=data["todo_id"]).first()
+        if todo == None:
+            return jsonify({"404": "Todo not found!"})
+        else:
+            todo.is_completed = not todo.is_completed
+            db.session.commit()
+            return jsonify({"202": "Success"})
 
 @app.route("/delete_todo", methods=["POST"])
 def deleteTodo():
