@@ -122,7 +122,7 @@ def viewTodo():
         return jsonify({"202": "Success", "todos": data})
 
 @app.route("/toggle_todo", methods=["POST"])
-def viewTodo():
+def toggleTodo():
     if not request.json:
         abort(400)
     data = request.json
