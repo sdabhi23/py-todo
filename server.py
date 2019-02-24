@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 import string, random
 import os
 
@@ -29,13 +30,15 @@ class Todo(db.Model):
     title = db.Column(db.String(1024))
     message = db.Column(db.String(10240))
     is_completed = db.Column(db.Boolean, default=True, nullable=False)
+    created_on = db.Column(db.DateTime, default=datetime.utcnow(), nullable=False)
+    updated_on = db.Column(db.DateTime, default=datetime.utcnow(), nullable=False)
 
 def id_generator(size=12, chars=string.ascii_uppercase + string.digits + string.ascii_lowercase):
     return ''.join(random.choice(chars) for _ in range(size))
 
 @app.route("/")
 def index():
-    return jsonify({"greeting": "Welcome to the PyTODO API"})
+    return jsonify({"greeting": "Welcome to the PyTODO API. You can find the docs on https://sdabhi23.github.io/py-todo/"})
 
 @app.route("/signup", methods=['POST'])
 def signup():
@@ -135,6 +138,7 @@ def toggleTodo():
             return jsonify({"404": "Todo not found!"})
         else:
             todo.is_completed = not todo.is_completed
+            todo.updated_on = datetime.utcnow()
             db.session.commit()
             return jsonify({"202": "Success"})
 
