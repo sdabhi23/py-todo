@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from datetime import datetime
 import string, random
 import os
@@ -12,7 +11,6 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ['DATABASE_URL']
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 class User(db.Model):
 
