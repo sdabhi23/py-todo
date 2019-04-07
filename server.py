@@ -31,9 +31,9 @@ class Todo(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     title = db.Column(db.String(1024))
     message = db.Column(db.String(10240))
-    is_completed = db.Column(db.Boolean, default=True, nullable=False)
-    created_on = db.Column(db.DateTime, default=datetime.utcnow())
-    updated_on = db.Column(db.DateTime, default=datetime.utcnow())
+    is_completed = db.Column(db.Boolean, default=False, nullable=False)
+    created_on = db.Column(db.DateTime, default=datetime.utcnow(), nullable=False)
+    updated_on = db.Column(db.DateTime, default=datetime.utcnow(), nullable=False)
 
 def id_generator(size=12, chars=string.ascii_uppercase + string.digits + string.ascii_lowercase):
     return ''.join(random.choice(chars) for _ in range(size))
