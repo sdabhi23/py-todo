@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import string, random
+import string
+import random
 import os
 
 app = Flask(__name__)
@@ -12,6 +13,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
+
 class User(db.Model):
 
     __tablename__ = "users"
@@ -21,24 +23,31 @@ class User(db.Model):
     password = db.Column(db.String(10))
     token = db.Column(db.String(12))
 
+
 class Todo(db.Model):
 
     __tablename__ = "todos"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey(
+        "users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     title = db.Column(db.String(1024))
     message = db.Column(db.String(10240))
     is_completed = db.Column(db.Boolean, default=False, nullable=False)
-    created_on = db.Column(db.DateTime, default=datetime.utcnow(), nullable=False)
-    updated_on = db.Column(db.DateTime, default=datetime.utcnow(), nullable=False)
+    created_on = db.Column(
+        db.DateTime, default=datetime.utcnow(), nullable=False)
+    updated_on = db.Column(
+        db.DateTime, default=datetime.utcnow(), nullable=False)
+
 
 def id_generator(size=12, chars=string.ascii_uppercase + string.digits + string.ascii_lowercase):
     return ''.join(random.choice(chars) for _ in range(size))
 
+
 @app.route("/")
 def index():
     return jsonify({"greeting": "Welcome to the PyTODO API. You can find the docs on https://sdabhi23.github.io/py-todo/"})
+
 
 @app.route("/signup", methods=['POST'])
 def signup():
@@ -50,9 +59,10 @@ def signup():
         new_user = User(name=data["name"], password=data["password"])
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({"202": "Success"})
+        return jsonify({"res_code": "200"})
     else:
-        return jsonify({"403": "User already exists"})
+        return jsonify({"res_code": "403"})
+
 
 @app.route("/login", methods=['POST'])
 def login():
@@ -67,9 +77,10 @@ def login():
             new_token = id_generator()
             user.token = new_token
             db.session.commit()
-            return jsonify({"202": "Success", "token": user.token})
+            return jsonify({"res_code": "200", "token": user.token})
         else:
-            return jsonify({"403": "Invalid credentials"})
+            return jsonify({"res_code": "403"})
+
 
 @app.route("/user", methods=['POST'])
 def user():
@@ -78,9 +89,10 @@ def user():
     data = request.json
     user = User.query.filter_by(token=data["token"]).first()
     if user == None:
-        return jsonify({"403": "Invalid token"})
+        return jsonify({"res_code": "403"})
     else:
-        return jsonify({"202": "Success", "name": user.name})
+        return jsonify({"res_code": "200", "name": user.name})
+
 
 @app.route("/logout", methods=["POST"])
 def logout():
@@ -89,11 +101,12 @@ def logout():
     data = request.json
     user = User.query.filter_by(token=data["token"]).first()
     if user == None:
-        return jsonify({"403": "Invalid token"})
+        return jsonify({"res_code": "403"})
     else:
         user.token = None
         db.session.commit()
-        return jsonify({"202": "Success"})
+        return jsonify({"res_code": "200"})
+
 
 @app.route("/new_todo", methods=["POST"])
 def newTodo():
@@ -102,12 +115,14 @@ def newTodo():
     data = request.json
     user = User.query.filter_by(token=data["token"]).first()
     if user == None:
-        return jsonify({"403": "Uauthorized Access"})
+        return jsonify({"res_code": "403"})
     else:
-        todo = Todo(user_id=user.id, title=data["title"], message=data["message"])
+        todo = Todo(user_id=user.id,
+                    title=data["title"], message=data["message"])
         db.session.add(todo)
         db.session.commit()
-        return jsonify({"202": "Success"})
+        return jsonify({"res_code": "200"})
+
 
 @app.route("/list_todo", methods=["POST"])
 def viewTodo():
@@ -116,13 +131,15 @@ def viewTodo():
     data = request.json
     user = User.query.filter_by(token=data["token"]).first()
     if user == None:
-        return jsonify({"403": "Uauthorized Access"})
+        return jsonify({"res_code": "403"})
     else:
-        todos = Todo.query.filter(Todo.user_id==user.id).all()
+        todos = Todo.query.filter(Todo.user_id == user.id).all()
         data = []
         for todo in todos:
-            data.append({"id": todo.id, "title": todo.title, "message": todo.message})
-        return jsonify({"202": "Success", "todos": data})
+            data.append({"id": todo.id, "title": todo.title, "message": todo.message, "is_commpleted": todo.is_commpleted,
+                         "created_on": todo.created_on.strftime("%m/%d/%Y, %H:%M:%S"), "updated_on": todo.updated_on.strftime("%m/%d/%Y, %H:%M:%S")})
+        return jsonify({"res_code": "200", "todos": data})
+
 
 @app.route("/toggle_todo", methods=["POST"])
 def toggleTodo():
@@ -131,16 +148,17 @@ def toggleTodo():
     data = request.json
     user = User.query.filter_by(token=data["token"]).first()
     if user == None:
-        return jsonify({"403": "Uauthorized Access"})
+        return jsonify({"res_code": "403"})
     else:
         todo = Todo.query.filter_by(id=data["todo_id"]).first()
         if todo == None:
-            return jsonify({"404": "Todo not found!"})
+            return jsonify({"res_code": "404"})
         else:
             todo.is_completed = not todo.is_completed
             todo.updated_on = datetime.utcnow()
             db.session.commit()
-            return jsonify({"202": "Success"})
+            return jsonify({"res_code": "200"})
+
 
 @app.route("/delete_todo", methods=["POST"])
 def deleteTodo():
@@ -149,12 +167,12 @@ def deleteTodo():
     data = request.json
     user = User.query.filter_by(token=data["token"]).first()
     if user == None:
-        return jsonify({"403": "Uauthorized Access"})
+        return jsonify({"res_code": "403"})
     else:
         todo = Todo.query.filter_by(id=data["todo_id"]).first()
         if todo == None:
-            return jsonify({"404": "Todo not found!"})
+            return jsonify({"res_code": "404"})
         else:
             db.session.delete(todo)
             db.session.commit()
-            return jsonify({"202": "Success", "deleted": {"id": todo.id, "title": todo.title, "message": todo.message}})
+            return jsonify({"res_code": "200", "deleted": {"id": todo.id, "title": todo.title, "message": todo.message}})
