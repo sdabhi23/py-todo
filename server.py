@@ -136,7 +136,7 @@ def viewTodo():
         todos = Todo.query.filter(Todo.user_id == user.id).all()
         data = []
         for todo in todos:
-            data.append({"id": todo.id, "title": todo.title, "message": todo.message, "is_commpleted": todo.is_commpleted,
+            data.append({"id": todo.id, "title": todo.title, "message": todo.message, "is_completed": todo.is_completed,
                          "created_on": todo.created_on.strftime("%m/%d/%Y, %H:%M:%S"), "updated_on": todo.updated_on.strftime("%m/%d/%Y, %H:%M:%S")})
         return jsonify({"res_code": "200", "todos": data})
 
