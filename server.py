@@ -153,7 +153,7 @@ def viewTodo():
         for todo in todos:
             data.append({"id": todo.id, "title": todo.title, "content": todo.content, "is_completed": todo.is_completed,
                          "created_on": todo.created_on.strftime("%m/%d/%Y, %H:%M:%S"), "updated_on": todo.updated_on.strftime("%m/%d/%Y, %H:%M:%S")})
-        return jsonify({"res_code": "200", "todos": data})
+        return jsonify({"res_code": "200", "count":len(data), "todos": data})
 
 
 @app.route("/toggle_todo", methods=["POST"])
