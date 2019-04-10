@@ -32,7 +32,7 @@ class Todo(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey(
         "users.id", onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     title = db.Column(db.String(1024))
-    message = db.Column(db.String(10240))
+    content = db.Column(db.String(10240))
     is_completed = db.Column(db.Boolean, default=False, nullable=False)
     created_on = db.Column(
         db.DateTime, default=datetime.utcnow(), nullable=False)
@@ -133,7 +133,7 @@ def newTodo():
         return jsonify({"res_code": "403"})
     else:
         todo = Todo(user_id=user.id,
-                    title=data["title"], message=data["message"])
+                    title=data["title"], content=data["content"])
         db.session.add(todo)
         db.session.commit()
         return jsonify({"res_code": "200"})
@@ -151,7 +151,7 @@ def viewTodo():
         todos = Todo.query.filter(Todo.user_id == user.id).all()
         data = []
         for todo in todos:
-            data.append({"id": todo.id, "title": todo.title, "message": todo.message, "is_completed": todo.is_completed,
+            data.append({"id": todo.id, "title": todo.title, "content": todo.content, "is_completed": todo.is_completed,
                          "created_on": todo.created_on.strftime("%m/%d/%Y, %H:%M:%S"), "updated_on": todo.updated_on.strftime("%m/%d/%Y, %H:%M:%S")})
         return jsonify({"res_code": "200", "todos": data})
 
@@ -190,4 +190,4 @@ def deleteTodo():
         else:
             db.session.delete(todo)
             db.session.commit()
-            return jsonify({"res_code": "200", "deleted": {"id": todo.id, "title": todo.title, "message": todo.message}})
+            return jsonify({"res_code": "200", "deleted": {"id": todo.id, "title": todo.title, "content": todo.content}})
