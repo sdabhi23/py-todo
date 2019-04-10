@@ -71,7 +71,7 @@ def login():
     data = request.json
     user = User.query.filter_by(name=data["name"]).first()
     if user == None:
-        return jsonify({"403": "User does not exist"})
+        return jsonify({"res_code": "403"})
     else:
         if user.password == data["password"]:
             new_token = id_generator()
@@ -92,6 +92,21 @@ def user():
         return jsonify({"res_code": "403"})
     else:
         return jsonify({"res_code": "200", "name": user.name})
+
+
+@app.route("/check_token", methods=['POST'])
+def check_token():
+    if not request.json:
+        abort(400)
+    data = request.json
+    user = User.query.filter_by(name=data["name"]).first()
+    if user == None:
+        return jsonify({"403": "User does not exist"})
+    else:
+        if user.token == data["token"]:
+            return jsonify({"res_code": "200"})
+        else:
+            return jsonify({"res_code": "403"})
 
 
 @app.route("/logout", methods=["POST"])
