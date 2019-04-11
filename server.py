@@ -118,7 +118,7 @@ def logout():
     if user == None:
         return jsonify({"res_code": "403"})
     else:
-        user.token = None
+        user.token = ""
         db.session.commit()
         return jsonify({"res_code": "200"})
 
@@ -136,7 +136,7 @@ def newTodo():
                     title=data["title"], content=data["content"])
         db.session.add(todo)
         db.session.commit()
-        return jsonify({"res_code": "200"})
+        return jsonify({"res_code": "200", "id": todo.id, "updated_on": todo.updated_on})
 
 
 @app.route("/list_todo", methods=["POST"])
@@ -153,7 +153,7 @@ def viewTodo():
         for todo in todos:
             data.append({"id": todo.id, "title": todo.title, "content": todo.content, "is_completed": todo.is_completed,
                          "created_on": todo.created_on.strftime("%m/%d/%Y, %H:%M:%S"), "updated_on": todo.updated_on.strftime("%m/%d/%Y, %H:%M:%S")})
-        return jsonify({"res_code": "200", "count":len(data), "todos": data})
+        return jsonify({"res_code": "200", "count": len(data), "todos": data})
 
 
 @app.route("/toggle_todo", methods=["POST"])
