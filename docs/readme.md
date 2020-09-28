@@ -6,8 +6,6 @@ A simple flask server and a command line client for todos
 
 ## API Docs
 
-#### Base URL: https://sdabhi23.pythonanywhere.com
-
 1. Sign Up
     - Request:
         ```HTTP
